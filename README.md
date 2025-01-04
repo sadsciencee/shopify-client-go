@@ -15,6 +15,123 @@ So yeah. genqlient is doing most of the heavy lifting here. This project provide
 
 The rest is up to you. 
 
+## Setup
+### Config Files
+Refer to /example in this repo for initial configuration requirements.
+
+Add these files to your root directory, or place them in a package to keep your top level clean.
+
+- /graphql contains your queries and mutations
+- .env is required for introspection. SHOPIFY_API_KEY is your public key
+- genqlient.yaml is a pre-filled configuration file. If you are running from root directory, no changes are needed. However, if running from inside a package, change `package: agql` to `package: your-package-name` and instead of `generated: agql/genqlient.go` use `generated: your-package-name.go`
+
+### Scripts
+
+Run these commands in order from the directory containing your genqlient.yaml file
+
+- go run github.com/sadsciencee/shopify-client-go@latest introspect
+- go run github.com/sadsciencee/shopify-client-go@latest gen
+
+After running `introspect` you should see a schema.graphql file in your directory.
+
+After running `gen` you should see the generated client file or directory.
+
+## Usage
+### Initialize Client
+Use `clientManager := NewManager()` to initialize a client pool.
+
+This library does not provide session auth or management. So to create a new client you will need to have already completed oAuth.
+
+```go
+ApiVersion := "2025-01"
+clientManager := NewManager()
+clientConfig := Config{
+    AccessToken: auth.ShopifyAccessToken,
+    ShopUrl:     auth.ShopUrl,
+    Version:     ApiVersion,
+}
+```
+
+### Use Client
+Here is an example function that takes `client` from `github.com/sadsciencee/shopify-client-go/client` and runs a metafield definition migration from one shop to another.
+In this case you would initialize a source client and dest client
+
+```go
+import (
+"context"
+"fmt"
+"your-root-package/agql"
+"github.com/sadsciencee/shopify-client-go/client"
+)
+
+func migrateMetafieldDefinitions(ctx context.Context, source client.Client, dest client.Client, ownerType agql.MetafieldOwnerType) {
+    var waitGroup sync.WaitGroup
+    
+    response, err := agql.GetMetafieldDefinitions(ctx, source, ownerType, ptr(250))
+    if err != nil {
+        log.Fatal(err)
+    }
+    
+    responseLength := len(response.MetafieldDefinitions.Edges)
+    fmt.Printf("Total metafield definitions: %d\n", responseLength)
+    
+    for _, edge := range response.MetafieldDefinitions.Edges {
+        waitGroup.Add(1)
+        node := edge.Node
+        
+        definition := agql.MetafieldDefinitionInput{
+            Namespace:   &node.Namespace,
+            Key:         node.Key,
+            Description: node.Description,
+            Name:        node.Name,
+            OwnerType:   node.OwnerType,
+            Type:        node.Type.Name,
+            Access: &agql.MetafieldAccessInput{
+                Admin:           nil,
+                Storefront:      node.Access.Storefront.ToInput(),
+                CustomerAccount: node.Access.CustomerAccount.ToInput(),
+            },
+            Capabilities: &agql.MetafieldCapabilityCreateInput{
+                SmartCollectionCondition: &agql.MetafieldCapabilitySmartCollectionConditionInput{
+                    Enabled: node.Capabilities.SmartCollectionCondition.Enabled,
+                },
+                AdminFilterable: &agql.MetafieldCapabilityAdminFilterableInput{
+                    Enabled: node.Capabilities.AdminFilterable.Enabled,
+                },
+            },
+        }
+    
+        definitionCopy := definition
+        
+        go func(definitionInput agql.MetafieldDefinitionInput) {
+            defer waitGroup.Done()
+        
+            result, error := agql.CreateMetafieldDefinition(ctx, dest, &definitionInput)
+            if error != nil {
+                log.Printf("Error creating metafield definition: %v", error)
+                return
+            }
+        
+            if result != nil && result.MetafieldDefinitionCreate != nil && len(result.MetafieldDefinitionCreate.UserErrors) > 0 {
+                fmt.Println("------------------------------------------------")
+                log.Println("Error creating metafield definition")
+                
+                for _, userError := range result.MetafieldDefinitionCreate.UserErrors {
+                    fmt.Println(userError.Code, userError.Message, userError.Field)
+                }
+                
+                fmt.Println("------------------------------------------------")
+            }
+        }(definitionCopy)
+    }
+
+    waitGroup.Wait()
+    fmt.Printf("Metafield definitions migration complete for owner type: %s\n", ownerType)
+}
+```
+## genqlient
+For more information configuring your genqlient.yaml file, refer to the [genqlient docs](https://github.com/Khan/genqlient/blob/main/docs/genqlient.yaml).
+
 ## How To Contribute
 The types provided in this library only exist to improve inference and developer experience. However, it is my goal to eventually have all enums and mutation inputs hardcoded in this library to reduce boilerplate in user code.
 
