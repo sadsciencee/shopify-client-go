@@ -1,6 +1,6 @@
 package main
 
-import "aoc2024/cmd"
+import "github.com/sadsciencee/shopify-client-go/cmd"
 
 func main() {
 	cmd.Execute()

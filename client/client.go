@@ -51,13 +51,13 @@ func (e shopifyErrorList) Extensions() []map[string]interface{} {
 	return extensions
 }
 
-type ClientManager struct {
+type Manager struct {
 	clients map[string]Client
 	mutex   sync.RWMutex
 }
 
-func NewClientManager() *ClientManager {
-	return &ClientManager{
+func NewManager() *Manager {
+	return &Manager{
 		clients: make(map[string]Client),
 	}
 }
@@ -66,7 +66,7 @@ func generateClientKey(config Config) string {
 	return fmt.Sprintf("%s:%s:%s", config.ShopUrl, config.Version, config.AccessToken)
 }
 
-func (manager *ClientManager) GetClient(config Config) Client {
+func (manager *Manager) GetClient(config Config) Client {
 	key := generateClientKey(config)
 
 	manager.mutex.RLock()

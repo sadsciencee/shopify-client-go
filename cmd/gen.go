@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/Khan/genqlient/generate"
 	"github.com/spf13/cobra"
+	"os"
 )
 
 var gen = &cobra.Command{
@@ -12,15 +13,15 @@ var gen = &cobra.Command{
 	Long:  `Generate the client`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("Generate")
-		/*dir, _ := os.Getwd()
+		dir, _ := os.Getwd()
 		fmt.Printf("Current working directory: %s\n", dir)
-		config := generate.Config{}
-		config.ValidateAndFillDefaults(dir)
-		_, err := generate.Generate(&config)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}*/
+
+		// Add debug output for files in current directory
+		files, _ := os.ReadDir(".")
+		for _, f := range files {
+			fmt.Printf("Found file: %s\n", f.Name())
+		}
+
 		generate.Main()
 	},
 }
