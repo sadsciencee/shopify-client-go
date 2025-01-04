@@ -1,0 +1,21 @@
+schema: schema.graphql
+operations:
+  - graphql/queries/*.graphql
+  - graphql/mutations/*.graphql
+generated: agql/genqlient.go
+use_struct_references: true
+package: agql
+optional: pointer
+bindings:
+  Int:
+    type: int
+  Float:
+    type: float64
+  Boolean:
+    type: bool
+  String:
+    type: string
+  ID:
+    type: string
+package_bindings:
+  - package: github.com/sadsciencee/shopify-client-go/types

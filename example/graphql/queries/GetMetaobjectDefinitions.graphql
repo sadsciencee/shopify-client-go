@@ -1,0 +1,18 @@
+query GetMetaobjectDefinitions($first: Int!, $after: String) {
+    metaobjectDefinitions(first: $first, after: $after) {
+        edges {
+            cursor
+            node {
+                id
+                name
+                type
+                description
+                metaobjectsCount
+            }
+        }
+        pageInfo {
+            hasNextPage
+            endCursor
+        }
+    }
+}

@@ -1,0 +1,46 @@
+mutation CreateMetafieldDefinition($definition: MetafieldDefinitionInput!) {
+    metafieldDefinitionCreate(definition: $definition) {
+        createdDefinition {
+            id
+            namespace
+            key
+            name
+            description
+            ownerType
+            type {
+                name
+                category
+                supportsDefinitionMigrations
+                supportedValidations {
+                    name
+                    type
+                }
+            }
+            validationStatus
+            pinnedPosition
+            useAsCollectionCondition
+            metafieldsCount
+            access {
+                admin
+                storefront
+            }
+            capabilities {
+                smartCollectionCondition {
+                    enabled
+                }
+                adminFilterable {
+                    enabled
+                }
+            }
+            validations {
+                name
+                value
+            }
+        }
+        userErrors {
+            field
+            message
+            code
+        }
+    }
+}

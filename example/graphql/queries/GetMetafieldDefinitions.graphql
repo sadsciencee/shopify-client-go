@@ -1,0 +1,91 @@
+query GetMetafieldDefinitions($ownerType: MetafieldOwnerType!, $first: Int = 250) {
+	metafieldDefinitions(first: $first, ownerType: $ownerType) {
+		edges {
+			node {
+				id
+				key
+				name
+				namespace
+				description
+				ownerType
+				pinnedPosition
+				type {
+					category
+					name
+					supportedValidations {
+						name
+						type
+					}
+					supportsDefinitionMigrations
+					valueType
+				}
+				access {
+					admin
+					customerAccount
+					storefront
+				}
+				capabilities {
+					adminFilterable {
+						eligible
+						enabled
+						status
+					}
+					smartCollectionCondition {
+						eligible
+						enabled
+					}
+					uniqueValues {
+						eligible
+						enabled
+					}
+				}
+				constraints {
+					key
+					values(first: 10) {
+						edges {
+							node {
+								value
+							}
+						}
+					}
+				}
+				metafieldsCount
+				standardTemplate {
+					description
+					id
+					key
+					name
+					namespace
+					ownerTypes
+					type {
+						category
+						name
+						supportedValidations {
+							name
+							type
+						}
+						supportsDefinitionMigrations
+						valueType
+					}
+					validations {
+						name
+						type
+						value
+					}
+					visibleToStorefrontApi
+				}
+				useAsCollectionCondition
+				validationStatus
+				validations {
+					name
+					type
+					value
+				}
+			}
+		}
+		pageInfo {
+			hasNextPage
+			endCursor
+		}
+	}
+}
