@@ -5,6 +5,7 @@ import (
 	"github.com/Khan/genqlient/generate"
 	"github.com/spf13/cobra"
 	"os"
+	"path/filepath"
 )
 
 var gen = &cobra.Command{
@@ -13,15 +14,31 @@ var gen = &cobra.Command{
 	Long:  `Generate the client`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("Generate")
-		dir, _ := os.Getwd()
-		fmt.Printf("Current working directory: %s\n", dir)
-
-		// Add debug output for files in current directory
-		files, _ := os.ReadDir(".")
-		for _, f := range files {
-			fmt.Printf("Found file: %s\n", f.Name())
+		config, err := generate.ReadAndValidateConfig("genqlient.yaml")
+		if err != nil {
+			fmt.Printf("Error reading config: %v\n", err)
+			os.Exit(1)
 		}
+		res, err := generate.Generate(config)
+		if err != nil {
+			fmt.Printf("Error generating client: %v\n", err)
+			os.Exit(1)
+		}
+		// Write each generated file to disk
+		for filename, content := range res {
+			// Ensure the directory exists
+			dir := filepath.Dir(filename)
+			if err := os.MkdirAll(dir, 0755); err != nil {
+				fmt.Printf("Error creating directory %s: %v\n", dir, err)
+				os.Exit(1)
+			}
 
-		generate.Main()
+			// Write the file
+			if err := os.WriteFile(filename, content, 0644); err != nil {
+				fmt.Printf("Error writing file %s: %v\n", filename, err)
+				os.Exit(1)
+			}
+			fmt.Printf("Generated: %s\n", filename)
+		}
 	},
 }
