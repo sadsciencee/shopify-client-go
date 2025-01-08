@@ -19,16 +19,10 @@ jobs:
         with:
           go-version: '1.23'
 
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: Install Shopify CLI
-        run: npm install -g @shopify/cli @shopify/app
-
       - name: Run tests
         env:
-          SHOPIFY_CLI_PARTNERS_TOKEN: ${{ secrets.SHOPIFY_CLI_TOKEN }}
-          SHOPIFY_CLIENT_SECRET: ${{ secrets.SHOPIFY_CLIENT_SECRET }}
-        run: go test ./test/v2025_01/...
+          SHOPIFY_API_KEY: ${{ secrets.SHOPIFY_API_KEY }}
+          TEST_SHOPIFY_ACCESS_TOKEN: ${{ secrets.TEST_SHOPIFY_ACCESS_TOKEN }}
+          TEST_SHOP_URL: ${{ secrets.TEST_SHOP_URL }}
+          API_VERSION: ${{ vars.API_VERSION }}
+        run: go test ./client/...
