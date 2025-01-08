@@ -17,9 +17,8 @@ var introspect = &cobra.Command{
 	Long:  `Introspect the schema. Query is dependent on the permissions on your API key and the version of the API.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("Introspect")
-		dir, _ := os.Getwd()
-		fmt.Printf("Current working directory: %s\n", dir)
-		config.Load()
+		config.Load("./.env")
+
 		c := config.Get()
 
 		// Define the URL

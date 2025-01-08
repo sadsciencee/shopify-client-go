@@ -15,10 +15,12 @@ type Config struct {
 
 var cfg *Config
 
-func Load() {
-	err := godotenv.Load() // "../.env"
-	if err != nil {
-		log.Fatal("Error loading .env file")
+func Load(envPath string) {
+	if os.Getenv("CI") != "true" {
+		err := godotenv.Load(envPath)
+		if err != nil {
+			log.Fatal("Error loading .env file")
+		}
 	}
 	cfg = &Config{
 		ShopifyApiKey:          os.Getenv("SHOPIFY_API_KEY"),

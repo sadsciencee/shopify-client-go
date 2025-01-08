@@ -9,7 +9,7 @@ import (
 )
 
 func getConfig() *config.Config {
-	config.Load()
+	config.Load("../.env")
 	return config.Get()
 }
 
